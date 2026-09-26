@@ -1,0 +1,9 @@
+{
+  "plugins": [
+    {
+      "id": "verse-server-host",
+      "installedAt": 1790384333624,
+      "version": "1.2.0"
+    }
+  ]
+}

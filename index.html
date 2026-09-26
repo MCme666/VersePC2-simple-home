@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simple Home · 简单主页 · 说明与状态</title>
+<!--
+  ==========================================================================
+  说明：VersePC2 的插件运行时（plugin-runtime.js）只读取 plugin.json 中
+  ui.main / ui.style / ui.pages / ui.cards / ui.pet 声明的文件，不会加载
+  index.html。本文件仅作为「离线说明 / 状态面板」：
+    · 打包前用浏览器打开可快速预览插件信息与网站清单；
+    · 提交审核时随包一起提供，便于审核者了解插件行为；
+    · 不影响安装，也不参与运行时加载。
+  ==========================================================================
+-->
+<style>
+  :root {
+    --accent: #7c5cff;
+    --bg: #0f0f12;
+    --card: #191a20;
+    --text: #f3f3f5;
+    --muted: #9a9aa5;
+    --border: rgba(255, 255, 255, .1);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 40px 20px;
+    background: var(--bg); color: var(--text);
+    font: 14px/1.7 "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+  .hero { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .logo {
+    width: 48px; height: 48px; border-radius: 14px; flex: none;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff;
+    background: linear-gradient(135deg, var(--accent), #a78bfa);
+    box-shadow: 0 8px 24px rgba(124, 92, 255, .32);
+  }
+  h1 { margin: 0; font-size: 22px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px 20px; margin-bottom: 16px;
+  }
+  .card h2 { margin: 0 0 10px; font-size: 15px; }
+  .kv { display: grid; grid-template-columns: 96px 1fr; gap: 4px 12px; font-size: 13px; }
+  .kv span:nth-child(odd) { color: var(--muted); }
+  ul { margin: 6px 0 0; padding-left: 20px; font-size: 13px; }
+  li { margin-bottom: 4px; }
+  code {
+    padding: 1px 6px; border-radius: 5px; font-size: 12px;
+    background: rgba(255, 255, 255, .08);
+  }
+  .note { font-size: 12px; color: var(--muted); margin-top: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+  .site {
+    padding: 8px 10px; border-radius: 10px; font-size: 12.5px;
+    background: rgba(255, 255, 255, .04); border: 1px solid var(--border);
+  }
+  .site i { display: block; font-style: normal; font-size: 11px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="logo">SH</div>
+    <div>
+      <h1>Simple Home · 简单主页</h1>
+      <div class="sub">下滑打开快捷网站 · 一键内存优化 · 清理游戏垃圾</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>插件信息</h2>
+    <div class="kv">
+      <span>插件 ID</span><span>simple-home</span>
+      <span>显示名称</span><span>简单主页</span>
+      <span>版本</span><span>1.0.0</span>
+      <span>作者</span><span>MCme</span>
+      <span>分类</span><span>function（功能）</span>
+      <span>开源协议</span><span>GPL v3</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>功能说明</h2>
+    <ul>
+      <li><b>下滑展开</b>：仅在「主页」且页面滚动到顶部时，继续向下滚动（滚轮 / 触摸板 / 触摸），主内容区整体向上平移 350ms（ease-out），露出下方贴底的「简单主页」面板——类似网页滚到顶部继续下拉露出新内容。</li>
+      <li><b>上滑收回</b>：向上滚动，主内容回落原位，面板同步下移隐藏。</li>
+      <li><b>关闭方式</b>：上滑、点击面板右上角「✕」、点击半透明遮罩、按 Esc、或切换到其它页面。</li>
+      <li><b>备用唤出</b>：<code>Ctrl+Alt+H</code>；手势开关关闭时也生效。</li>
+      <li><b>默认开启</b>：下滑展开每次启动都默认开启（忽略历史关闭值）；面板底部开关仅本次会话有效，重启恢复开启。也可用 <code>VersePC.SimpleHome.setGesture(true)</code> 即时开启。</li>
+      <li><b>快捷网站</b>：面板内的网站清单直接从启动器「工具箱」页面模板解析，点击在系统默认浏览器打开。</li>
+      <li><b>释放内存</b>：复用启动器「设置 → 其他」的内存优化能力（<code>doMemoryOptimize()</code>）。</li>
+      <li><b>清理游戏垃圾</b>：复用启动器垃圾扫描与一键清理（<code>cleanupScan()</code> → <code>cleanupRun()</code>）。</li>
+      <li><b>双语</b>：按 <code>navigator.language</code> 自动切换中 / 英文，可在面板底部手动覆盖。</li>
+      <li><b>样式隔离</b>：所有 UI 渲染在 Shadow DOM 内，仅继承启动器 CSS 变量以保持一致观感。</li>
+    </ul>
+    <div class="note">插件不拦截、不阻止任何原有事件（滚轮与触摸监听均为 passive 且不调用 preventDefault），不会影响启动器原有功能。</div>
+  </div>
+
+  <div class="card">
+    <h2>内置兜底网站（工具箱不可用时）</h2>
+    <div class="grid">
+      <div class="site">Minecraft Wiki<i>最权威的官方百科</i></div>
+      <div class="site">MC百科<i>中文 Mod 百科数据库</i></div>
+      <div class="site">CurseForge<i>全球最大 Mod 平台</i></div>
+      <div class="site">Modrinth<i>新兴开源 Mod 平台</i></div>
+      <div class="site">MineBBS<i>国内 MC 中文论坛</i></div>
+      <div class="site">苦力怕论坛<i>资源丰富的中文社区</i></div>
+      <div class="site">MCStacker<i>命令在线生成器</i></div>
+      <div class="site">Chunkbase<i>种子地图 / 结构定位</i></div>
+      <div class="site">LittleSkin<i>国内皮肤站</i></div>
+      <div class="site">MCNav<i>MC 资源一站导航</i></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>安装与自检</h2>
+    <ul>
+      <li>把 <code>plugin.json</code>、<code>main.js</code>、<code>style.css</code>、<code>index.html</code> 所在目录整体压缩为 <code>simple-home.zip</code>（<code>plugin.json</code> 需位于包内有效根目录）。</li>
+      <li>在启动器「插件 → 已安装」安装该 zip，安装成功后回到「主页」向下滚动即可展开面板。</li>
+      <li>若侧边栏按钮 / 面板未出现，重启启动器触发运行时重扫；启动器「日志」中可查看 <code>[plugin-runtime]</code> 相关输出。</li>
+      <li>网站图标来自在线 favicon 服务，离线时自动回退为站点首字母，不影响点击打开。</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

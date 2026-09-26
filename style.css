@@ -1,0 +1,491 @@
+/* ==========================================================================
+ * Simple Home（简单主页）· 样式表
+ * 说明：
+ *   1. 本文件由插件运行时以 ui.style 注入到启动器全局（<style id="plugin-style-simple-home">）；
+ *   2. main.js 会读取该 <style> 的文本并把同样的内容注入 Shadow DOM，
+ *      因此 ".shp-*" 规则在隔离环境内生效；".shp-content-shift" 规则作用于
+ *      light DOM 的 .content-area（主页内容整体上移）。
+ *   3. 颜色全部复用启动器 CSS 变量，自动跟随主题与深浅色。
+ * ========================================================================== */
+
+/* ---------- 露出的高度：面板高度 == 内容区上移距离 ---------- */
+:root {
+  --shp-reveal-h: clamp(300px, 58vh, 520px);
+}
+
+/* ---------- 宿主：只覆盖内容区（避开侧边栏） ----------
+   注意：#app 带内联 z-index:2（index.html:260），宿主挂在 body 上必须高于它，
+   否则面板会被整个应用遮住（内容上移了也看不见面板）。 */
+#shp-host {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: var(--sidebar-width, 0px);
+  z-index: 9998;
+  pointer-events: none;
+  font-family: inherit;
+}
+
+body.sidebar-collapsed #shp-host {
+  left: 0;
+}
+
+/* ---------- 主页内容整体上移（light DOM） ----------
+   1. animation:none 用于解除 .content-area 自带的 pageIn 动画对 transform 的占用
+      （animation-fill-mode:both 会覆盖内联/类样式的 transform）；
+   2. z-index 高于宿主，保证收回时内容压在面板之上；
+   3. 350ms ease-out 平移。 */
+.shp-content-shift {
+  position: relative;
+  z-index: 2;
+  animation: none !important;
+  transform: translateY(0);
+  transition: transform 350ms ease-out;
+  will-change: transform;
+}
+
+.shp-content-shift.is-revealed {
+  transform: translateY(calc(-1 * var(--shp-reveal-h)));
+}
+
+/* ---------- 遮罩：内容变暗，点击收回 ---------- */
+.shp-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 350ms ease-out;
+}
+
+.shp-mask.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- 面板：贴底抽屉，随内容上移露出 ---------- */
+.shp-panel {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--shp-reveal-h);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  pointer-events: none;
+  color: var(--text-primary, #f3f3f5);
+  background: var(--bg-card-glass, var(--bg-card, var(--bg-secondary, #191a20)));
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  transition: transform 350ms ease-out;
+}
+
+.shp-panel.is-open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ---------- 头部 ---------- */
+.shp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+/* 顶部小横条，暗示"抽屉" */
+.shp-panel::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  width: 42px;
+  height: 4px;
+  margin-left: -21px;
+  border-radius: 999px;
+  background: var(--bg-active, rgba(255, 255, 255, 0.18));
+}
+
+.shp-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shp-logo {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--accent-text, #fff);
+  background: linear-gradient(135deg, var(--accent, #7c5cff), var(--accent-hover, var(--accent, #7c5cff)));
+  box-shadow: 0 4px 14px var(--accent-glow, rgba(124, 92, 255, 0.3));
+}
+
+.shp-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.shp-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--text-muted, #9a9aa5);
+  line-height: 1.3;
+}
+
+.shp-icon-btn {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: none;
+  cursor: pointer;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--text-secondary, #4a4a4a);
+  background: var(--bg-hover, rgba(255, 255, 255, 0.06));
+  transition: background var(--transition-fast, 0.15s) ease, color var(--transition-fast, 0.15s) ease;
+}
+
+.shp-icon-btn:hover {
+  color: var(--text-primary, #f3f3f5);
+  background: var(--bg-active, rgba(255, 255, 255, 0.12));
+}
+
+/* ---------- 快捷操作 ---------- */
+.shp-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 12px 20px 4px;
+}
+
+.shp-act {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text-primary, #f3f3f5);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md, 12px);
+  transition: background var(--transition-fast, 0.15s) ease,
+              border-color var(--transition-fast, 0.15s) ease,
+              transform var(--transition-fast, 0.15s) ease;
+}
+
+.shp-act:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--accent, #7c5cff);
+  transform: translateY(-1px);
+}
+
+.shp-act:disabled {
+  cursor: progress;
+  opacity: 0.6;
+  transform: none;
+}
+
+.shp-act-ico {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border-radius: 9px;
+  background: var(--bg-active, rgba(255, 255, 255, 0.1));
+}
+
+.shp-act-primary .shp-act-ico {
+  color: var(--accent-text, #fff);
+  background: linear-gradient(135deg, var(--accent, #7c5cff), var(--accent-hover, var(--accent, #7c5cff)));
+}
+
+.shp-act-txt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.shp-act-txt b {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.shp-act-txt i {
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted, #9a9aa5);
+}
+
+/* ---------- 内存状态 ---------- */
+.shp-mem {
+  margin: 10px 20px 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.shp-mem-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 12px;
+}
+
+.shp-mem-row span:first-child {
+  color: var(--text-secondary, #4a4a4a);
+}
+
+.shp-mem-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary, #f3f3f5);
+}
+
+.shp-bar {
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--bg-active, rgba(255, 255, 255, 0.1));
+}
+
+.shp-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--accent, #7c5cff);
+  transition: width 0.4s var(--ease-out-expo, ease);
+}
+
+.shp-mem-detail {
+  margin-top: 5px;
+  font-size: 11px;
+  color: var(--text-muted, #9a9aa5);
+}
+
+/* ---------- 搜索 ---------- */
+.shp-search {
+  padding: 12px 20px 6px;
+}
+
+.shp-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--text-primary, #f3f3f5);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  border-radius: var(--radius-md, 10px);
+  outline: none;
+  transition: border-color var(--transition-fast, 0.15s) ease;
+}
+
+.shp-input:focus {
+  border-color: var(--accent, #7c5cff);
+}
+
+.shp-input::placeholder {
+  color: var(--text-muted, #9a9aa5);
+}
+
+/* ---------- 网站列表 ---------- */
+.shp-sites {
+  flex: 1;
+  min-height: 60px;
+  overflow-y: auto;
+  padding: 6px 20px 12px;
+}
+
+.shp-sites::-webkit-scrollbar {
+  width: 6px;
+}
+
+.shp-sites::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--accent, #7c5cff);
+}
+
+.shp-cat {
+  margin: 10px 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--text-muted, #9a9aa5);
+}
+
+.shp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.shp-site {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  color: var(--text-primary, #f3f3f5);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 10px);
+  transition: background var(--transition-fast, 0.15s) ease,
+              border-color var(--transition-fast, 0.15s) ease,
+              transform var(--transition-fast, 0.15s) ease;
+}
+
+.shp-site:hover {
+  background: var(--bg-hover, rgba(255, 255, 255, 0.08));
+  border-color: var(--accent, #7c5cff);
+  transform: translateY(-1px);
+}
+
+.shp-fav {
+  flex: none;
+  position: relative;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-text, #fff);
+  background: linear-gradient(135deg, var(--accent, #7c5cff), var(--accent-hover, var(--accent, #7c5cff)));
+}
+
+.shp-fav-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.shp-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.shp-meta b {
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shp-meta i {
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--text-muted, #9a9aa5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shp-go {
+  flex: none;
+  font-size: 12px;
+  color: var(--text-muted, #9a9aa5);
+}
+
+.shp-empty {
+  padding: 24px 0;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted, #9a9aa5);
+}
+
+/* ---------- 底部设置 ---------- */
+.shp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 20px 14px;
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+}
+
+.shp-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--text-secondary, #4a4a4a);
+}
+
+.shp-switch input {
+  accent-color: var(--accent, #7c5cff);
+  cursor: pointer;
+}
+
+.shp-lang {
+  display: flex;
+  gap: 4px;
+}
+
+.shp-lang button {
+  padding: 4px 9px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 999px;
+  color: var(--text-secondary, #4a4a4a);
+  background: var(--bg-secondary, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  transition: all var(--transition-fast, 0.15s) ease;
+}
+
+.shp-lang button.is-active {
+  color: var(--accent-text, #fff);
+  background: var(--accent, #7c5cff);
+  border-color: var(--accent, #7c5cff);
+}
+
+/* ---------- 尊重"减少动效"偏好 ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .shp-panel,
+  .shp-mask,
+  .shp-content-shift,
+  .shp-site,
+  .shp-act {
+    transition: none;
+  }
+}

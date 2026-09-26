@@ -1,0 +1,20 @@
+{
+  "id": "simple-home",
+  "name": "简单主页",
+  "version": "1.0.0",
+  "category": "function",
+  "author": "MCme",
+  "description": "下滑打开快捷网站、一键内存优化、清理游戏垃圾",
+  "main": "main.js",
+  "icon": "",
+  "permissions": {
+    "network": false,
+    "native": []
+  },
+  "ui": {
+    "main": "main.js",
+    "style": "style.css",
+    "pages": [],
+    "cards": []
+  }
+}
